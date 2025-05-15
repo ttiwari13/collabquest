@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.text-spotlight {
+    color: #bfe4c2; /* light green */
+    position: relative;
+    font-size: 1.5rem;
+    line-height: 2.6rem;
+    letter-spacing: 0.03em;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+  
+  .text-spotlight.hovering {
+    background: radial-gradient(circle at var(--x) var(--y), white 100px, transparent 160px);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  
+  
+  
+  
