@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
-import { firestore } from "../firebase"; // Use the correct Firestore instance
+import { firestore } from "../../firebase";
 
 const WorkspaceMembers = ({ memberIds }) => {
   const [membersInfo, setMembersInfo] = useState([]);
@@ -40,18 +40,15 @@ const WorkspaceMembers = ({ memberIds }) => {
   }, [memberIds]);
 
   if (loading) {
-    return <div className="p-4 bg-white rounded shadow">Loading workspace members...</div>;
+    return <div className="text-xs text-[#CAB964] ml-6 mt-1">Loading members...</div>;
   }
 
   return (
-    <div className="p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-semibold mb-2">Workspace Members:</h2>
-      <ul className="list-disc pl-5">
-        {membersInfo.length === 0 && <li>No members found.</li>}
-        {membersInfo.map((member) => (
-          <li key={member.uid}>{member.name}</li>
-        ))}
-      </ul>
+    <div className="text-xs text-[#CAB964] ml-6 mt-1 flex flex-wrap gap-2">
+      {membersInfo.length === 0 && <span>No members found.</span>}
+      {membersInfo.map((member) => (
+        <span key={member.uid} className="bg-[#1d474d] rounded px-2 py-0.5">{member.name}</span>
+      ))}
     </div>
   );
 };

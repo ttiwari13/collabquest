@@ -65,10 +65,6 @@ const ToggleMenu = () => {
           <li className="cursor-pointer" onClick={() => handleNavigation('/dashboard')}>
             Dashboard
           </li>
-
-          <li className="cursor-pointer" onClick={() => handleNavigation('/notifications')}>
-            Notification
-          </li>
           <li className="cursor-pointer" onClick={() => handleNavigation('/settings')}>
             Settings
           </li>

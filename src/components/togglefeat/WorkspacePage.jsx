@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { useParams, useNavigate } from 'react-router-dom';
+import { doc, getDoc, collection, getDocs, updateDoc, arrayRemove } from 'firebase/firestore';
 import { firestore } from '../../firebase';
 import MemberList from './MemberList';
-import TodoList from './TodoList';
+import TodoList from './ToDoList';
 import ActivityFeed from './ActivityFeed';
 import ProductivityChart from './ProductivityChart';
+import { FaSignOutAlt } from 'react-icons/fa';
+import { getAuth } from 'firebase/auth';
 
 function WorkspacePage() {
   const { workspaceId } = useParams();
@@ -14,6 +16,10 @@ function WorkspacePage() {
   const [taskData, setTaskData] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchWorkspace = async () => {
       try {
@@ -21,7 +27,7 @@ function WorkspacePage() {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          setWorkspace(docSnap.data());
+          setWorkspace({ id: docSnap.id, ...docSnap.data() });
         } else {
           setWorkspace(null);
         }
@@ -66,6 +72,29 @@ function WorkspacePage() {
     }
   }, [tasks]);
 
+  // --- Leave Workspace Handler ---
+  const handleLeaveWorkspace = async () => {
+    if (!user) return;
+    if (workspace.admin === user.uid) {
+      alert("Admin cannot leave the workspace. Please transfer admin rights first.");
+      return;
+    }
+    const confirmLeave = window.confirm(`Are you sure you want to leave "${workspace.name}"?`);
+    if (!confirmLeave) return;
+
+    try {
+      const wsRef = doc(firestore, 'workspaces', workspaceId);
+      await updateDoc(wsRef, {
+        members: arrayRemove(user.uid)
+      });
+      alert(`You have left "${workspace.name}".`);
+      navigate('/dashboard');
+    } catch (err) {
+      alert('Failed to leave workspace.');
+      console.error(err);
+    }
+  };
+
   if (loading) return <div className="p-4 text-lg">Loading workspace...</div>;
   if (!workspace) return <div className="p-4 text-red-600">Workspace not found.</div>;
 
@@ -74,13 +103,24 @@ function WorkspacePage() {
       {/* Sidebar */}
       <aside className="w-64 bg-[#265B63] text-[#CAB964] p-4 overflow-y-auto">
         <h2 className="text-xl font-semibold mb-4">Members</h2>
-        {/* Pass adminId as workspace.admin */}
         <MemberList members={workspace.members} adminId={workspace.admin} />
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 p-6 space-y-6 overflow-y-auto">
-        <h2 className="text-3xl font-bold text-indigo-600">{workspace.name}</h2>
+        {/* Workspace name and leave icon */}
+        <div className="flex items-center gap-2">
+          <h2 className="text-3xl font-bold text-indigo-600">{workspace.name}</h2>
+          {user && workspace.members?.includes(user.uid) && (
+            <button
+              title="Leave Workspace"
+              onClick={handleLeaveWorkspace}
+              className="ml-2 text-yellow-500 hover:text-yellow-700 text-xl"
+            >
+              <FaSignOutAlt />
+            </button>
+          )}
+        </div>
         <p className="text-lg mb-2 font-medium">
           Admin: {workspace.adminName || 'Unknown Admin'}
         </p>

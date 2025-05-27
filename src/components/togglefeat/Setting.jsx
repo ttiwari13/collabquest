@@ -61,7 +61,7 @@ const Setting = () => {
 
   return (
     <div className="min-h-screen bg-[#CAB964] py-12 px-6 flex justify-center items-start">
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-2xl">
+      <div className="bg-gradient-to-r from-[#265B63] to-[#CAB964] rounded-xl shadow-lg p-8 w-full max-w-2xl">
         <h2 className="text-3xl font-semibold text-[#265B63] mb-6 text-center">Settings</h2>
 
         {/* Profile Photo */}
@@ -109,14 +109,14 @@ const Setting = () => {
 
         {/* Name with edit icon */}
         <div className="mb-6">
-          <label className="block text-[#265B63] font-semibold mb-1">Name</label>
-          <div className="flex items-center gap-2">
+          <label className="block text-white font-semibold mb-1">Name</label>
+          <div className="flex items-center gap-2 ">
             <input
               type="text"
               value={name}
               readOnly={!isEditingName}
               onChange={(e) => setName(e.target.value)}
-              className={`w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#265B63] ${
+              className={`w-full p-2 border  rounded focus:outline-none focus:ring-2 focus:ring-[#265B63] ${
                 isEditingName ? '' : 'bg-gray-100 text-gray-700'
               }`}
             />
@@ -142,7 +142,7 @@ const Setting = () => {
 
         {/* Email */}
         <div className="mb-6">
-          <label className="block text-[#265B63] font-semibold mb-1">Email</label>
+          <label className="block text-white font-semibold mb-1">Email</label>
           <input
             type="email"
             value={email}
@@ -153,7 +153,7 @@ const Setting = () => {
 
         {/* Password */}
         <div className="mb-6">
-          <label className="block text-[#265B63] font-semibold mb-1">Password</label>
+          <label className="block text-white font-semibold mb-1">Password</label>
           {!showPasswordInput ? (
             <button
               onClick={() => setShowPasswordInput(true)}
