@@ -151,7 +151,7 @@ useEffect(() => {
   fetchMembers();
 }, [selectedWorkspace]);
 
-  // Fetch all tasks across all workspaces for the user (for dashboard)
+  // Fetch all tasks across all workspaces for the CURRENT USER ONLY (for dashboard)
   useEffect(() => {
     if (!user) return;
     if (!myWorkspaces.length) {
@@ -161,7 +161,11 @@ useEffect(() => {
     const unsubscribes = [];
     let all = [];
     myWorkspaces.forEach(ws => {
-      const q = query(collection(firestore, 'workspaces', ws.id, 'tasks'));
+      // FIXED: Add where clause to filter tasks by current user's ID
+      const q = query(
+        collection(firestore, 'workspaces', ws.id, 'tasks'),
+        where('createdBy', '==', user.uid) // Only fetch tasks created by current user
+      );
       const unsub = onSnapshot(q, (snapshot) => {
         all = all.filter(t => t.workspaceId !== ws.id);
         const tasks = snapshot.docs.map(doc => ({
@@ -177,13 +181,13 @@ useEffect(() => {
     return () => unsubscribes.forEach(unsub => unsub());
   }, [user, myWorkspaces]);
 
-  // Dashboard-wide stats (all workspaces)
+  // Dashboard-wide stats (all workspaces) - NOW ONLY FOR CURRENT USER
   const totalTasks = allTasks.length;
   const completedTasks = allTasks.filter(t => t.completed).length;
   const uncompletedTasks = totalTasks - completedTasks;
   const completionPercent = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
-  // Prepare data for completion over time graph (dashboard-wide)
+  // Prepare data for completion over time graph (dashboard-wide) - NOW ONLY FOR CURRENT USER
   const completionHistory = allTasks
     .filter(t => t.completed && t.completedAt)
     .map(t => ({
@@ -518,17 +522,17 @@ useEffect(() => {
                 {/* Total Tasks */}
                 <div className="bg-gradient-to-br from-[#265B63] to-[#CAB964] rounded shadow p-3 sm:p-4 lg:p-6 flex flex-col items-center min-h-[80px] sm:min-h-[100px]">
                   <span className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{totalTasks}</span>
-                  <span className="text-white text-xs sm:text-sm text-center">Total Tasks</span>
+                  <span className="text-white text-xs sm:text-sm text-center">Your Total Tasks</span>
                 </div>
                 {/* Completed */}
                 <div className="bg-gradient-to-br from-[#265B63] to-[#CAB964] rounded shadow p-3 sm:p-4 lg:p-6 flex flex-col items-center min-h-[80px] sm:min-h-[100px]">
                   <span className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{completedTasks}</span>
-                  <span className="text-white text-xs sm:text-sm text-center">Completed</span>
+                  <span className="text-white text-xs sm:text-sm text-center">Your Completed</span>
                 </div>
                 {/* Uncompleted */}
                 <div className="bg-gradient-to-br from-[#265B63] to-[#CAB964] rounded shadow p-3 sm:p-4 lg:p-6 flex flex-col items-center min-h-[80px] sm:min-h-[100px]">
                   <span className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{uncompletedTasks}</span>
-                  <span className="text-white text-xs sm:text-sm text-center">Uncompleted</span>
+                  <span className="text-white text-xs sm:text-sm text-center">Your Pending</span>
                 </div>
                 {/* Circular Progress */}
                 <div className="bg-gradient-to-br from-[#265B63] to-[#CAB964] rounded shadow p-3 sm:p-4 lg:p-6 flex flex-col items-center min-h-[80px] sm:min-h-[100px]">
@@ -544,13 +548,13 @@ useEffect(() => {
                       })}
                     />
                   </div>
-                  <span className="text-white mt-2 text-xs sm:text-sm text-center">Completion</span>
+                  <span className="text-white mt-2 text-xs sm:text-sm text-center">Your Progress</span>
                 </div>
                 {/* Task Completed Streak */}
                 <div className="bg-gradient-to-br from-[#265B63] to-[#CAB964] rounded shadow p-3 sm:p-4 lg:p-6 flex flex-col items-center min-h-[80px] sm:min-h-[100px]">
                   <span className="text-2xl sm:text-3xl lg:text-4xl text-white mb-1 sm:mb-2">🔥</span>
                   <span className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{streak}</span>
-                  <span className="text-white text-xs sm:text-sm text-center">Task Streak</span>
+                  <span className="text-white text-xs sm:text-sm text-center">Your Task Streak</span>
                 </div>
                 {/* Total Time */}
                 <div className="bg-gradient-to-br from-[#265B63] to-[#CAB964] rounded shadow p-3 sm:p-4 lg:p-6 flex flex-col items-center min-h-[80px] sm:min-h-[100px]">
@@ -558,7 +562,7 @@ useEffect(() => {
                   <span className="text-sm sm:text-lg lg:text-xl font-bold text-white text-center leading-tight"> 
                     {formatTime(totalTime + stopwatchAccumulated + extraTime)}
                   </span>
-                  <span className="text-white text-xs sm:text-sm text-center">Total Time</span>
+                  <span className="text-white text-xs sm:text-sm text-center">Your Total Time</span>
                 </div>
               </div>
 
@@ -569,7 +573,7 @@ useEffect(() => {
               
               {/* Completion Over Time Graph */}
               <div className="mt-6 sm:mt-8 w-full max-w-4xl">
-                <h4 className="text-base sm:text-lg font-semibold text-[#265B63] mb-2 text-center">Task Completion Over Time</h4>
+                <h4 className="text-base sm:text-lg font-semibold text-[#265B63] mb-2 text-center">Your Task Completion Over Time</h4>
                 <div className="bg-gradient-to-br from-[#265B63] to-[#CAB964] rounded shadow p-3 sm:p-4">
                   <ResponsiveContainer width="100%" height={200} className="sm:h-[220px]">
                     <LineChart data={chartData}>
